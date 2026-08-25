@@ -12,8 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Proxmox container and wait 1 hour
+      - name: Run Proxmox + expose via reverse SSH
         run: |
+          # Start Proxmox container
           docker run -it --rm \
             --name proxmox \
             --hostname pve \
@@ -25,8 +26,19 @@ jobs:
             --stop-timeout 120 \
             docker.io/dockurr/proxmox &
 
-          CONTAINER_PID=$!
-          echo "Proxmox container started with PID $CONTAINER_PID"
+          echo "Started Proxmox container"
 
+          # Open reverse SSH tunnel
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o LogLevel=ERROR \
+              -p 223 \
+              -l eSk76taMimYXQ8p3MJm9GEd3SCy4QRKfz2Vrybp9bRwaOKijdl3HQcWrH65YFK82gu-4h3fY8d4bk-P3POOW2w \
+              mwetadcswn.localto.net \
+              -R6579:127.0.0.1:8006 &
+
+          echo "Reverse SSH tunnel established"
+
+          # Keep everything alive for 1 hour
           sleep 3600
           echo "1 hour passed"
