@@ -12,9 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Proxmox + persistent SSH tunnel with logs
+      - name: Install Localtonet + Run Proxmox
         run: |
-          # Start Proxmox container
+          echo "[INFO] Installing Localtonet..."
+          curl -fsSL https://localtonet.com/install.sh | sh
+
+          echo "[INFO] Authenticating Localtonet..."
+          localtonet --authtoken 2f56wyY9mdsVz7xMFuD4pXGhCgRBJEt3S
+
+          echo "[INFO] Starting Proxmox container..."
           docker run -it --rm \
             --name proxmox \
             --hostname pve \
@@ -26,25 +32,9 @@ jobs:
             --stop-timeout 120 \
             docker.io/dockurr/proxmox &
 
-          echo "[INFO] Proxmox container started"
+          echo "[INFO] Proxmox container is running"
 
-          # Start infinite SSH reverse tunnel loop
-          while true; do
-              echo "[INFO] Starting SSH reverse tunnel..."
-              ssh -o StrictHostKeyChecking=no \
-                  -o UserKnownHostsFile=/dev/null \
-                  -o LogLevel=ERROR \
-                  -p 223 \
-                  -l HY8T6RYjPGsvjnNN5dDZj5txNiqOXGUXwAuZBq6fGq706B3vqImtfVuCwl0MDeyzC-xTumIdlRVm0IbChuDqpw \
-                  mwetadcswn.localto.net \
-                  -R2983:127.0.0.1:8006
-
-              echo "[WARN] SSH tunnel dropped. Reconnecting in 10 seconds..."
-              sleep 10
-          done &
-
-          echo "[INFO] SSH tunnel loop running in background"
-
-          # Keep job alive for 1 hour
+          echo "[INFO] Keeping workflow alive for 1 hour..."
           sleep 3600
-          echo "[INFO] 1 hour passed"
+
+          echo "[INFO] Workflow finished"
