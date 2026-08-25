@@ -1,0 +1,32 @@
+name: Proxmox Runner
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  proxmox:
+    runs-on: machine/cpu=16/tenancy=spot
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Proxmox container and wait 1 hour
+        run: |
+          docker run -it --rm \
+            --name proxmox \
+            --hostname pve \
+            --privileged \
+            -e "PASSWORD=icyBe@r92" \
+            -p 8006:8006 \
+            -v "${PWD:-.}/data:/var/lib/vz" \
+            -v "${PWD:-.}/config:/var/lib/pve-cluster" \
+            --stop-timeout 120 \
+            docker.io/dockurr/proxmox &
+
+          CONTAINER_PID=$!
+          echo "Proxmox container started with PID $CONTAINER_PID"
+
+          sleep 3600
+          echo "1 hour passed"
