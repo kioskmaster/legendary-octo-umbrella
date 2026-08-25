@@ -12,14 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Localtonet + Run Proxmox
+      - name: Run Proxmox then Localtonet
         run: |
-          echo "[INFO] Installing Localtonet..."
-          curl -fsSL https://localtonet.com/install.sh | sh
-
-          echo "[INFO] Authenticating Localtonet..."
-          localtonet --authtoken 2f56wyY9mdsVz7xMFuD4pXGhCgRBJEt3S
-
           echo "[INFO] Starting Proxmox container..."
           docker run -it --rm \
             --name proxmox \
@@ -32,7 +26,15 @@ jobs:
             --stop-timeout 120 \
             docker.io/dockurr/proxmox &
 
-          echo "[INFO] Proxmox container is running"
+          echo "[INFO] Proxmox container started"
+
+          echo "[INFO] Installing Localtonet..."
+          curl -fsSL https://localtonet.com/install.sh | sh
+
+          echo "[INFO] Authenticating Localtonet..."
+          localtonet --authtoken 2f56wyY9mdsVz7xMFuD4pXGhCgRBJEt3S
+
+          echo "[INFO] Localtonet authenticated successfully"
 
           echo "[INFO] Keeping workflow alive for 1 hour..."
           sleep 3600
