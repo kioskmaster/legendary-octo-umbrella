@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Proxmox + Pinggy Tunnel
+      - name: Run Proxmox + Pinggy TLS Tunnel
         run: |
           echo "[INFO] Starting Proxmox container..."
           docker run -it --rm \
@@ -28,14 +28,16 @@ jobs:
 
           echo "[INFO] Proxmox container started"
 
-          echo "[INFO] Starting Pinggy reverse tunnel..."
+          echo "[INFO] Starting Pinggy TLS tunnel..."
           ssh -p 443 \
               -R0:localhost:8006 \
               -o StrictHostKeyChecking=no \
               -o ServerAliveInterval=30 \
-              Z8Lyt41EAMb@free.pinggy.io &
+              -t \
+              Z8Lyt41EAMb@free.pinggy.io \
+              x:localServerTls:localhost &
 
-          echo "[INFO] Pinggy tunnel running in background"
+          echo "[INFO] Pinggy TLS tunnel running in background"
 
           echo "[INFO] Keeping workflow alive for 1 hour..."
           sleep 3600
