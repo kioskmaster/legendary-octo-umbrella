@@ -12,8 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Proxmox + Pinggy TLS Tunnel
+      - name: Install SSH + Run Proxmox + Pinggy TCP Tunnel
         run: |
+          echo "[INFO] Installing SSH client..."
+          sudo apt-get update
+          sudo apt-get install -y openssh-client
+
           echo "[INFO] Starting Proxmox container..."
           docker run -it --rm \
             --name proxmox \
@@ -28,16 +32,16 @@ jobs:
 
           echo "[INFO] Proxmox container started"
 
-          echo "[INFO] Starting Pinggy TLS tunnel..."
+          echo "[INFO] Starting Pinggy TCP tunnel..."
           ssh -p 443 \
-              -R0:localhost:8006 \
+              -R0:127.0.0.1:22 \
               -o StrictHostKeyChecking=no \
               -o ServerAliveInterval=30 \
               -t \
-              Z8Lyt41EAMb@free.pinggy.io \
+              Z8Lyt41EAMb+tcp@free.pinggy.io \
               x:localServerTls:localhost &
 
-          echo "[INFO] Pinggy TLS tunnel running in background"
+          echo "[INFO] Pinggy TCP tunnel running in background"
 
           echo "[INFO] Keeping workflow alive for 1 hour..."
           sleep 3600
