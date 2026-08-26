@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run Proxmox then Localtonet
+      - name: Run Proxmox + Pinggy Tunnel
         run: |
           echo "[INFO] Starting Proxmox container..."
           docker run -it --rm \
@@ -28,13 +28,14 @@ jobs:
 
           echo "[INFO] Proxmox container started"
 
-          echo "[INFO] Installing Localtonet..."
-          curl -fsSL https://localtonet.com/install.sh | sh
+          echo "[INFO] Starting Pinggy reverse tunnel..."
+          ssh -p 443 \
+              -R0:localhost:8006 \
+              -o StrictHostKeyChecking=no \
+              -o ServerAliveInterval=30 \
+              Z8Lyt41EAMb@free.pinggy.io &
 
-          echo "[INFO] Authenticating Localtonet..."
-          localtonet --authtoken 2f56wyY9mdsVz7xMFuD4pXGhCgRBJEt3S
-
-          echo "[INFO] Localtonet authenticated successfully"
+          echo "[INFO] Pinggy tunnel running in background"
 
           echo "[INFO] Keeping workflow alive for 1 hour..."
           sleep 3600
